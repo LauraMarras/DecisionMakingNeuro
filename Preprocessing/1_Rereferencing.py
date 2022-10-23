@@ -159,17 +159,17 @@ def laplacianR(data, channels, SIZE=1):
 
 
 if __name__=='__main__':
-    PPs = ['kh21', 'kh22', 'kh23', 'kh24', 'kh25']
+    PPs = ['p01', 'p02', 'p03', 'p04', 'p05']
 
     for pp in PPs:
-        data_path = 'C:/Users/laura/Documents/Data_Analysis/Data/RawData/'
-        out_path = 'C:/Users/laura/Documents/Data_Analysis/Data/PreprocessedData/Rereferencing/{}/'.format(pp)
+        data_path = '/RawData/'
+        out_path = '/PreprocessedData/Rereferencing/{}/'.format(pp)
         if not os.path.exists(out_path):
             os.makedirs(out_path)
 
     # Load data
         data, _ = pyxdf.load_xdf(data_path + '{}_test.xdf'.format(pp))
-        if '25' in pp:
+        if pp == 'p05':
             n = 0
         else:
             n = 1
@@ -183,21 +183,6 @@ if __name__=='__main__':
         np.save(out_path + '{}_cleanChannels'.format(pp), channels)
         
     # Rereferencing
-        # LaplacianR
-        seeg_LapR, chann_LapR = laplacianR(seeg, channels)
-        np.save(out_path + '{}_seeg_LapR'.format(pp), seeg_LapR)
-        np.save(out_path + '{}_chann_LapR'.format(pp), chann_LapR)
-        
-        # CAR
-        seeg_CAR = commonAverageR(seeg)
-        np.save(out_path + '{}_seeg_CAR'.format(pp), seeg_CAR)
-
         # elecShaftR
         seeg_ESR = elecShaftR(seeg, channels)
-        np.save(out_path + '{}_seeg_ESR'.format(pp), seeg_ESR) 
-
-        # Bipolar
-        seeg_BPR, chann_BPR, chann_BPRdes = bipolarR(seeg, channels)
-        np.save(out_path + '{}_seeg_BPR'.format(pp), seeg_BPR)
-        np.save(out_path + '{}_chann_BPR'.format(pp), chann_BPR)
-        np.save(out_path + '{}_chann_des_BPR'.format(pp), chann_BPRdes)   
+        np.save(out_path + '{}_seeg_ESR'.format(pp), seeg_ESR)

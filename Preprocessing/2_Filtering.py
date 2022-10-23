@@ -53,15 +53,15 @@ def extract_envelope(data, bands):
 
 
 if __name__=='__main__':
-    PPs = ['kh21', 'kh22', 'kh23', 'kh24', 'kh25'] #'kh21', 'kh22', 'kh23', 'kh24', 
-    reref = ['ESR'] #'LapR', 'CAR', 'BPR'
+    PPs = ['p01', 'p02', 'p03', 'p04', 'p05']
+    reref = ['ESR']
     bands = dict(zip(['delta', 'theta', 'alpha', 'beta', 'highGamma'], [(1,3), (4,7), (8,12), (13,30), (70,120)]))
     sr=1024
 
 # Filtering
     for pp in PPs:
-        data_path = 'C:/Users/laura/Documents/Data_Analysis/Data/PreprocessedData/Rereferencing/{}/'.format(pp)
-        out_path = 'C:/Users/laura/Documents/Data_Analysis/Data/PreprocessedData/Filtering/{}/'.format(pp)
+        data_path = '/PreprocessedData/Rereferencing/{}/'.format(pp)
+        out_path = '/PreprocessedData/Filtering/{}/'.format(pp)
         if not os.path.exists(out_path):
             os.makedirs(out_path)
     
@@ -77,8 +77,8 @@ if __name__=='__main__':
 
 # Extract envelope
     for pp in PPs:
-        data_path = 'C:/Users/laura/Documents/Data_Analysis/Data/PreprocessedData/Filtering/{}/'.format(pp)
-        out_path = 'C:/Users/laura/Documents/Data_Analysis/Data/PreprocessedData/Envelope/{}/'.format(pp)
+        data_path = '/PreprocessedData/Filtering/{}/'.format(pp)
+        out_path = '/PreprocessedData/Envelope/{}/'.format(pp)
         if not os.path.exists(out_path):
             os.makedirs(out_path)
 

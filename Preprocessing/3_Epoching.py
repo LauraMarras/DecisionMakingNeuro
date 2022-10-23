@@ -53,22 +53,22 @@ def epoching_indices(task_time_series, seeg_time_series, indices, win_start=0, w
     return epoch_start, epoch_end
 
 if __name__=='__main__':
-    PPs = ['kh25'] #'kh21', 'kh22', 'kh23', 'kh24', 
+    PPs = ['p01', 'p02', 'p03', 'p04', 'p05']
     bands = dict(zip(['delta', 'theta', 'alpha', 'beta', 'highGamma'], [(1,3), (4,7), (8,12), (13,30), (70,120)]))
     reref = 'ESR'
     sr=1024
 
     for pp in PPs:
-        data_path = 'C:/Users/laura/Documents/Data_Analysis/Data/RawData/'
-        envelope_path = 'C:/Users/laura/Documents/Data_Analysis/Data/PreprocessedData/Envelope/{}/'.format(pp)
-        out_path = 'C:/Users/laura/Documents/Data_Analysis/Data/PreprocessedData/Epoching/{}/'.format(pp)
+        data_path = '/RawData/'
+        envelope_path = '/PreprocessedData/Envelope/{}/'.format(pp)
+        out_path = '/PreprocessedData/Epoching/{}/'.format(pp)
         if not os.path.exists(out_path):
             os.makedirs(out_path)
     
         # Load data, seeg and timestamps, sampling rate
         envelopes = np.load(envelope_path + '{}_seeg_{}_envelopes.npy'.format(pp, reref)) # np.array samples*channels*bands
         data, _ = pyxdf.load_xdf(data_path + '{}_test.xdf'.format(pp))
-        if '25' in pp:
+        if pp == 'p05':
             seeg_ts = data[0]['time_stamps']
             task_ts = data[1]['time_stamps']
             markers = data[1]['time_series']
