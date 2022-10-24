@@ -26,8 +26,8 @@ def extract_labels(pNr, markers):
     
 if __name__=="__main__":
     PPs = ['p01', 'p02', 'p03', 'p04', 'p05']
-    data_path = '/RawData/'
-    out_path = '/PreprocessedData/Labels/'
+    data_path = 'RawData/'
+    out_path = 'PreprocessedData/Labels/'
     if not os.path.exists(out_path):
             os.makedirs(out_path)
     

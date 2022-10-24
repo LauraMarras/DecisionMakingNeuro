@@ -13,7 +13,7 @@ def windowing(envelope_epoched, window_len, step, sr):
     n_win = len(stop)
     start=start[:n_win]
 
-    envelope_windowed = np.zeros((envelope_epoched.shape[0], n_win, win_len, envelope_epoched.shape[2], envelope_epoched.shape[3]))
+    envelope_windowed = np.zeros((envelope_epoched.shape[0], n_win, win_len, envelope_epoched.shape[2], envelope_epoched.shape[3]), dtype=np.float32)
 
     for w in range(n_win):
         envelope_windowed[:, w, :, :, :] = envelope_epoched[:, start[w]:stop[w], :, :]
@@ -24,14 +24,14 @@ if __name__=='__main__':
     PPs = ['p01', 'p02', 'p03', 'p04', 'p05']
     reref = 'ESR'
     sr=1024
-    window_len = 0.5
+    window_len = 0.1
     step = 0.05
-    short_epoch = ['stimulus']
-    long_epoch = ['long_stim']
+    short_epoch = 'stimulus'
+    long_epoch = 'long_stim'
 
     for pp in PPs:
-        data_path = '/PreprocessedData/Epoching/{}/'.format(pp)
-        out_path = '/PreprocessedData/Features/{}/'.format(pp)
+        data_path = 'PreprocessedData/Epoching/{}/'.format(pp)
+        out_path = 'PreprocessedData/Features/{}/'.format(pp)
         if not os.path.exists(out_path):
             os.makedirs(out_path)
 

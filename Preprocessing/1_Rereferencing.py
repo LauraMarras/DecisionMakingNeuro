@@ -20,7 +20,7 @@ def cleanData(channels, data):
         channels names
     """
     bad_channels_i = [c for c, x in enumerate(channels) if '+' in x or 'el' in x] # define useless channels
-    bad_channels = [c for c in channels if '+' in x or 'el' in x] # define useless channels
+    bad_channels = [c for c in channels if '+' in c or 'el' in c] # define useless channels
     
     channels = [c for c in channels if c not in bad_channels]
     data = np.delete(data, bad_channels_i, axis=1) # remove from sEEG data
@@ -162,8 +162,8 @@ if __name__=='__main__':
     PPs = ['p01', 'p02', 'p03', 'p04', 'p05']
 
     for pp in PPs:
-        data_path = '/RawData/'
-        out_path = '/PreprocessedData/Rereferencing/{}/'.format(pp)
+        data_path = 'RawData/'
+        out_path = 'PreprocessedData/Rereferencing/{}/'.format(pp)
         if not os.path.exists(out_path):
             os.makedirs(out_path)
 

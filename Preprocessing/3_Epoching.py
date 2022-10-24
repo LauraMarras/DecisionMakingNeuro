@@ -59,9 +59,9 @@ if __name__=='__main__':
     sr=1024
 
     for pp in PPs:
-        data_path = '/RawData/'
-        envelope_path = '/PreprocessedData/Envelope/{}/'.format(pp)
-        out_path = '/PreprocessedData/Epoching/{}/'.format(pp)
+        data_path = 'RawData/'
+        envelope_path = 'PreprocessedData/Envelope/{}/'.format(pp)
+        out_path = 'PreprocessedData/Epoching/{}/'.format(pp)
         if not os.path.exists(out_path):
             os.makedirs(out_path)
     
@@ -83,11 +83,13 @@ if __name__=='__main__':
             
         # Define epochs indexes for each window type start and end points
         epochs = {
+        'stimulus':{'indices':[i for i, x in enumerate(markers) if 'Start Stim' in x[0]], 'start':0, 'length':1},
+        'long_stim':{'indices':[i for i, x in enumerate(markers) if 'Start Trial' in x[0]], 'start':0, 'length':2}}
+
+        other_epochs = {
         'feedback':{'indices':[i for i, x in enumerate(markers) if 'start Fb' in x[0]], 'start':0, 'length':1},
         'baseline':{'indices':[i for i, x in enumerate(markers) if 'Start Cross' in x[0]], 'start':0, 'length':0.5},
         'long_FB':{'indices':[i for i, x in enumerate(markers) if 'Start Cross' in x[0]], 'start':0, 'length':2},
-        'stimulus':{'indices':[i for i, x in enumerate(markers) if 'Start Stim' in x[0]], 'start':0, 'length':1},
-        'long_stim':{'indices':[i for i, x in enumerate(markers) if 'Start Trial' in x[0]], 'start':0, 'length':2},
         'response':{'indices':[i for i, x in enumerate(markers) if ('Press' in x[0] and 'wrong' not in x[0])], 'start':-0.5, 'length':1}
         }
 
