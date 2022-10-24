@@ -5,14 +5,11 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import cross_val_score, cross_val_predict, StratifiedKFold, LeaveOneOut
 from sklearn.metrics import roc_auc_score
 
-def getFeaturesAndLabels(reref, pp, epoch, target, repetitions, single):
+def getFeaturesAndLabels(reref, pp, epoch, target, repetitions):
    # Define paths 
-   feature_path = 'C:/Users/laura/Documents/Data_Analysis/Data/PreprocessedData/Features/{}/'.format(pp)
-   label_path = 'C:/Users/laura/Documents/Data_Analysis/Data/PreprocessedData/Labels/'
-   out_path = 'C:/Users/laura/Documents/Data_Analysis/Data/DecodingResults/{}/{}/{}/{}/{}/'.format(reref, epoch, target, pp, single)
-   if not os.path.exists(out_path):
-      os.makedirs(out_path)
-
+   feature_path = 'PreprocessedData/Features/{}/'.format(pp)
+   label_path = 'PreprocessedData/Labels/'
+   
    # Load data   
    features = np.load(feature_path + '{}_{}_features_{}.npy'.format(pp, reref, epoch))
    labelsDF = pd.read_pickle(label_path + '{}_labels.pkl'.format(pp))
@@ -39,9 +36,9 @@ def getFeaturesAndLabels(reref, pp, epoch, target, repetitions, single):
    labels = labelsDF[target][labelsDF.repetition.isin(repetitions)].astype(int).to_numpy()
    r_name = ','.join([str(x) for x in repetitions])
 
-   return features, labels, r_name, out_path
+   return features, labels, r_name
 
-def permTest(features, labels, n_permutations=1000, single='band', cv_method='KFold'):
+def permTest(features, labels, n_permutations=1000, cv_method='LeaveOneOut'):
    score_perms = np.zeros((n_permutations))
    error_perms = np.zeros((n_permutations))
 
@@ -49,16 +46,9 @@ def permTest(features, labels, n_permutations=1000, single='band', cv_method='KF
    # Permute labels
       permuted_labels = np.random.permutation(labels)
       
-   # Specify if classifier runs per single band or per single channel
-      if single=='band':
-         dim = features.shape[-1]
-         random_band = np.random.choice(dim) # select a random band 
-         X = features[:,:,random_band]
-
-      elif single=='channel':
-         dim = features.shape[1]
-         random_chan = np.random.choice(dim)
-         X = features[:,random_chan,:]
+      dim = features.shape[1]
+      random_chan = np.random.choice(dim)
+      X = features[:,random_chan,:]
 
       # Define Classifier, run Crossvalidation for permuted labels dataset
       clf = LinearDiscriminantAnalysis(solver='lsqr', shrinkage='auto')
@@ -83,23 +73,15 @@ def permTest(features, labels, n_permutations=1000, single='band', cv_method='KF
    elif cv_method == 'KFold':
       return score_perms, error_perms   
 
-def classifier(features, labels, single='band', cv_method='KFold'):
-   # Specify if classifier runs per single band or per single channel
-   if single=='band':
-      dim = features.shape[-1]
-   elif single=='channel':
-      dim = features.shape[1]
+def classifier(features, labels, cv_method='LeaveOneOut'):
+   dim = features.shape[1]
 
    score_means = np.zeros((dim))
    errors = np.zeros((dim))
       
-   # Run Classifier for each band or channel
+   # Run Classifier for each channel
    for i in range(dim):     
-      if single=='band':
-         X = features[:,:,i]
-      elif single=='channel':
-         X = features[:,i,:]
-         
+      X = features[:,i,:]
       clf = LinearDiscriminantAnalysis(solver='lsqr', shrinkage='auto')
    
    # Define cross validation method to use
@@ -122,12 +104,8 @@ def classifier(features, labels, single='band', cv_method='KFold'):
    elif cv_method == 'KFold':
       return score_means, errors 
    
-def estimatePVals(score_perms, score_means, single='band'):
-   # Specify if classifier runs per single band or per single channel
-   if single=='band':
-      dim = features.shape[-1]
-   elif single=='channel':
-      dim = features.shape[1]
+def estimatePVals(score_perms, score_means):
+   dim = features.shape[1]
    
    # Get p-values
    p_vals = np.zeros((dim))
@@ -147,29 +125,33 @@ if __name__=="__main__":
    epoch = 'stimulus'
    target = 'decision'
    repetitions = [1]
-   pps = ['kh21', 'kh22', 'kh23', 'kh24', 'kh25']
+   PPs = ['p01', 'p02', 'p03', 'p04', 'p05']
    cv_method = 'LeaveOneOut'  #'KFold'
-   single = 'band'
    permutation = True
    n_permutations = 1000
    
-   for pp in pps:
+   for pp in PPs:
+   # Define OutPath
+      out_path = 'DecodingResults/{}/{}/{}/{}/'.format(reref, epoch, target, pp)
+      if not os.path.exists(out_path):
+         os.makedirs(out_path)
+
    # Get features and labels 
-      features, labels, r_name, out_path = getFeaturesAndLabels(reref, pp, epoch, target, repetitions, single)
+      features, labels, r_name = getFeaturesAndLabels(reref, pp, epoch, target, repetitions)
 
    # Run classifier
       if cv_method == 'LeaveOneOut':
-         score_means = classifier(features, labels, single=single, cv_method=cv_method)
+         score_means = classifier(features, labels, cv_method=cv_method)
       elif cv_method == 'KFold':
-         score_means, errors = classifier(features, labels, single=single, cv_method=cv_method)
+         score_means, errors = classifier(features, labels, cv_method=cv_method)
 
    # Save classifier scores
       if cv_method == 'LeaveOneOut':
-         np.savez(out_path + '{}_decoder_single{}_{}_{}'.format(pp, single.capitalize(), r_name, cv_method), 
+         np.savez(out_path + '{}_decoder_{}_{}'.format(pp, r_name, cv_method), 
             score_means=score_means
             )
       elif cv_method == 'KFold':
-         np.savez(out_path + '{}_decoder_single{}_{}_{}'.format(pp, single.capitalize(), r_name, cv_method), 
+         np.savez(out_path + '{}_decoder_{}_{}'.format(pp, r_name, cv_method), 
             score_means=score_means,
             errors=errors
             )
@@ -177,23 +159,23 @@ if __name__=="__main__":
       if permutation == True:
       # Run permutation test
          if cv_method == 'LeaveOneOut':
-            score_perms = permTest(features, labels, n_permutations=n_permutations, single=single, cv_method=cv_method)
+            score_perms = permTest(features, labels, n_permutations=n_permutations, cv_method=cv_method)
          elif cv_method == 'KFold':
-            score_perms, error_perms = permTest(features, labels, n_permutations=n_permutations, single=single, cv_method=cv_method)
+            score_perms, error_perms = permTest(features, labels, n_permutations=n_permutations, cv_method=cv_method)
 
       # Estimate significance threshold and p_vals
-         p_vals, threshold, significant_indices = estimatePVals(score_perms, score_means, single=single)
+         p_vals, threshold, significant_indices = estimatePVals(score_perms, score_means)
 
       # Save permTest data
          if cv_method == 'LeaveOneOut':
-            np.savez(out_path + '{}_decoder_single{}_{}_{}_permTest'.format(pp, single.capitalize(), r_name, cv_method), 
+            np.savez(out_path + '{}_decoder_{}_{}_permTest'.format(pp, r_name, cv_method), 
                score_perms=score_perms,
                p_vals=p_vals, 
                threshold=threshold, 
                significant_indices=significant_indices
                )
          elif cv_method == 'KFold':
-            np.savez(out_path + '{}_decoder_single{}_{}_{}_permTest'.format(pp, single.capitalize(), r_name, cv_method), 
+            np.savez(out_path + '{}_decoder_{}_{}_permTest'.format(pp, r_name, cv_method), 
                score_perms=score_perms,
                error_perms=error_perms,
                p_vals=p_vals, 
